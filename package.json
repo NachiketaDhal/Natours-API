@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "start:dev": "nodemon server.js",
-    "start:prod": "NODE_ENV=production nodemon server.js"
+    "start:prod": "NODE_ENV=production nodemon server.js",
+    "debug": "ndb server.js"
   },
   "author": "Nachiketa Dhal",
   "license": "ISC",
@@ -26,6 +27,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^3.3.0",
     "eslint-plugin-react": "^7.21.5",
+    "ndb": "^1.1.5",
     "prettier": "^2.2.1"
   },
   "engines": {
