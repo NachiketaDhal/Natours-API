@@ -1,3 +1,23 @@
+const AppError = require('../utils/appError');
+
+const handleCastErrorDB = (err) => {
+  const message = `Invalid ${err.path}: ${err.value}`;
+  return new AppError(message, 400);
+};
+
+const handleDuplicateFieldsDB = (err) => {
+  const value = Object.values(err.keyValue); // coverts the object to array of values(from key-value pairs)
+  const message = `Duplicate field value: ${value[0]}. Please use another value`;
+  return new AppError(message, 404);
+};
+
+const handleValidationErrorDB = (err) => {
+  // const errors = Object.values(err.errors).map((el) => el.message);
+  // const message = `Invalid input data: ${errors.join('. ')}`;
+  const message = err.message;
+  return new AppError(message, 404);
+};
+
 const sendErrorDev = (err, res) => {
   res.status(err.statusCode).json({
     status: err.status,
@@ -38,6 +58,16 @@ module.exports = (err, req, res, next) => {
   if (process.env.NODE_ENV === 'development') {
     sendErrorDev(err, res);
   } else if (process.env.NODE_ENV === 'production') {
-    sendErrorProd(err, res);
+    let error = { ...err };
+    error.name = err.name;
+    // To make isOperational = true in required cases
+    if (error.name === 'CastError') error = handleCastErrorDB(error); // undefined ID
+    if (error.code === 11000) error = handleDuplicateFieldsDB(error); // to handle duplicate values
+    if (error._message === 'Tour validation failed')
+      error = handleValidationErrorDB(err); // to handle validation error
+
+    sendErrorProd(error, res);
+
+    // sendErrorProd(error, res);
   }
 };

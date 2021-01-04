@@ -5,7 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start:dev": "nodemon server.js",
-    "start:prod": "NODE_ENV=production nodemon server.js",
+    "start:prod": "SET NODE_ENV=production& nodemon server.js",
     "debug": "ndb server.js"
   },
   "author": "Nachiketa Dhal",
