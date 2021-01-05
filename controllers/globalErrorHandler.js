@@ -12,9 +12,9 @@ const handleDuplicateFieldsDB = (err) => {
 };
 
 const handleValidationErrorDB = (err) => {
-  // const errors = Object.values(err.errors).map((el) => el.message);
-  // const message = `Invalid input data: ${errors.join('. ')}`;
-  const message = err.message;
+  const errors = Object.values(err.errors).map((el) => el.message);
+  const message = `Invalid input data: ${errors.join('. ')}`; // separate the sentences with '. '
+  // const message = err.message;
   return new AppError(message, 404);
 };
 
@@ -59,12 +59,13 @@ module.exports = (err, req, res, next) => {
     sendErrorDev(err, res);
   } else if (process.env.NODE_ENV === 'production') {
     let error = { ...err };
+    // console.log(JSON.stringify(err));
     error.name = err.name;
     // To make isOperational = true in required cases
     if (error.name === 'CastError') error = handleCastErrorDB(error); // undefined ID
     if (error.code === 11000) error = handleDuplicateFieldsDB(error); // to handle duplicate values
     if (error._message === 'Tour validation failed')
-      error = handleValidationErrorDB(err); // to handle validation error
+      error = handleValidationErrorDB(error); // to handle validation error
 
     sendErrorProd(error, res);
 
