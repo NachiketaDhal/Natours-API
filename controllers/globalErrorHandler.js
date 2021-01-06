@@ -3,6 +3,7 @@ const AppError = require('../utils/appError');
 const handleCastErrorDB = (err) => {
   const message = `Invalid ${err.path}: ${err.value}`;
   return new AppError(message, 400);
+  // already calling these functions inside global error handler, so no need of using next()
 };
 
 const handleDuplicateFieldsDB = (err) => {
@@ -16,6 +17,14 @@ const handleValidationErrorDB = (err) => {
   const message = `Invalid input data: ${errors.join('. ')}`; // separate the sentences with '. '
   // const message = err.message;
   return new AppError(message, 404);
+};
+
+const handleJWTError = () => {
+  return new AppError('Invalid token. Please login again!', 401);
+};
+
+const handleJWTExpiredError = () => {
+  return new AppError('Your token has been expired! Please login again', 401);
 };
 
 const sendErrorDev = (err, res) => {
@@ -66,6 +75,8 @@ module.exports = (err, req, res, next) => {
     if (error.code === 11000) error = handleDuplicateFieldsDB(error); // to handle duplicate values
     if (error._message === 'Tour validation failed')
       error = handleValidationErrorDB(error); // to handle validation error
+    if (error.name === 'JsonWebTokenError') error = handleJWTError(); // to handle invalid JWT
+    if (error.name === 'TokenExpiredError') error = handleJWTExpiredError(); // to handle expired JWT
 
     sendErrorProd(error, res);
 
