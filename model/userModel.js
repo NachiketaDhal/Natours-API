@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
@@ -40,6 +41,8 @@ const userSchema = new mongoose.Schema({
     },
   },
   passwordChangedAt: Date,
+  passwordResetToken: String,
+  passwordResetExpires: Date,
 });
 
 // Mongoose document pre MIDDLEWARE(pre--> because password needs to be hashed before saving to the database)
@@ -52,6 +55,14 @@ userSchema.pre('save', async function (next) {
 
   // Delete the passwordConfirm field from Database
   this.passwordConfirm = undefined;
+  next();
+});
+
+// To modify the passwordChangedAt property after password reset
+userSchema.pre('save', function (next) {
+  if (this.isModified('password') || this.isNew) return next();
+
+  this.passwordChangedAt = Date.now() - 1000; // the timestamp is created a little bit late, so we reduced 1 second
   next();
 });
 
@@ -76,6 +87,25 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   // false means not changed
   return false;
 };
+
+userSchema.methods.createPasswordResetToken = function () {
+  const resetToken = crypto.randomBytes(32).toString('hex'); // creates random token
+
+  // hash the reset token--> to store in Database
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  console.log({ resetToken }, this.passwordResetToken);
+
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes in milliseconds
+
+  // return the original(unencrypted) token to the user via email--> resetToken
+  // But in our Database store encrypted token--> passwordResetToken
+  return resetToken;
+};
+
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;
