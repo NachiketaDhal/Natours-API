@@ -6,7 +6,7 @@ const bcrypt = require('bcryptjs');
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: [true, 'Please tell us oyur name'],
+    required: [true, 'Please tell us your name'],
     minlength: [3, 'User name must have at least 3 characters'],
     maxlength: [28, 'User name must have at most 28 characters'],
   },
@@ -43,8 +43,14 @@ const userSchema = new mongoose.Schema({
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
+  active: {
+    type: Boolean,
+    default: true,
+    select: false,
+  },
 });
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Mongoose document pre MIDDLEWARE(pre--> because password needs to be hashed before saving to the database)
 userSchema.pre('save', async function (next) {
   // Only run this function if the password is modified
@@ -58,6 +64,7 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // To modify the passwordChangedAt property after password reset
 userSchema.pre('save', function (next) {
   if (this.isModified('password') || this.isNew) return next();
@@ -66,6 +73,14 @@ userSchema.pre('save', function (next) {
   next();
 });
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// To use the query only on active users
+userSchema.pre(/^find/, function (next) {
+  this.find({ active: { $ne: false } });
+  next();
+});
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // PASSWORD COMPARISION
 // correctPassword is an instance method which will be available in all documents of a certain collection
 // this --> current document
@@ -78,6 +93,8 @@ userSchema.methods.correctPassword = async function (
   return await bcrypt.compare(candidatePassword, userPassword);
 };
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// To check if the password is changed after receiving token
 userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
     const changedTimeStamp = parseInt(this.passwordChangedAt.getTime() / 1000);
@@ -88,6 +105,8 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   return false;
 };
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// To create password reset token
 userSchema.methods.createPasswordResetToken = function () {
   const resetToken = crypto.randomBytes(32).toString('hex'); // creates random token
 

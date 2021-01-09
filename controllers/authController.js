@@ -1,12 +1,12 @@
 const crypto = require('crypto');
 const { promisify } = require('util');
-const bcrypt = require('bcryptjs');
 const User = require('../model/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const jwt = require('jsonwebtoken');
 const sendEmail = require('../utils/email');
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Generate Token
 const signToken = (id) => {
   return jwt.sign({ id: id }, process.env.JWT_SECRET, {
@@ -14,9 +14,23 @@ const signToken = (id) => {
   });
 };
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Send Token
 const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    // secure: true, // cookie will only be sent on an encrypted connection(https)
+    httpOnly: true, // cookie can't be modified by the browser
+  };
+  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+
+  res.cookie('jwt', token, cookieOptions);
+
+  // Removes the password from output
+  user.password = undefined;
 
   res.status(statusCode).json({
     status: 'success',
@@ -27,6 +41,7 @@ const createSendToken = (user, statusCode, res) => {
   });
 };
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // SIGNUP
 exports.signUp = catchAsync(async (req, res, next) => {
   const newUser = await User.create({
@@ -42,6 +57,7 @@ exports.signUp = catchAsync(async (req, res, next) => {
   createSendToken(newUser, 201, res);
 });
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // LOGIN
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
@@ -65,6 +81,7 @@ exports.login = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // PROTECTED ROUTE can only be accessed by LOGGEDIN users
 exports.protect = catchAsync(async (req, res, next) => {
   // 1) Getting token and check if it's there
@@ -109,7 +126,8 @@ exports.protect = catchAsync(async (req, res, next) => {
   next();
 });
 
-// ROUTE RESTRICTION
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ROUTE RESTRICTION (like delete route can only be accessed by admin)
 exports.restrictTO = (...roles) => {
   // roles--> REST OPERATOR
   return (req, res, next) => {
@@ -123,6 +141,8 @@ exports.restrictTO = (...roles) => {
   };
 };
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// FORGOT PASSWORD
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   // 1) Get user based on POSTed email
   const user = await User.findOne({ email: req.body.email });
@@ -162,6 +182,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   }
 });
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // RESET PASSWORD
 exports.resetPassword = catchAsync(async (req, res, next) => {
   // 1) Get user based on the token
@@ -191,12 +212,14 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
-// UPDATE PASSWORD FOR LOGGEDIN USERS
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// UPDATE PASSWORD FOR LOGGEDIN USERS(req.user)
 exports.updatePassword = catchAsync(async (req, res, next) => {
   // 1) Get user from collection
   const user = await User.findById(req.user._id).select('+password');
 
   // 2) Check if POSTed current password is correct
+  // bcrypt.compare()
   if (!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
     return next(new AppError('Current password  did not match', 401));
   }
@@ -208,4 +231,22 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
 
   // 4) Log user in, send JWT
   createSendToken(user, 200, res);
+});
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// INACTIVE USERS
+exports.inactiveUsers = catchAsync(async (req, res, next) => {
+  const users = await User.aggregate([
+    {
+      $match: { active: { $ne: true } },
+    },
+  ]);
+
+  res.status(200).json({
+    status: 'success',
+    length: users.length,
+    data: {
+      users: users,
+    },
+  });
 });

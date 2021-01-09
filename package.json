@@ -14,12 +14,17 @@
     "bcryptjs": "^2.4.3",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "express-mongo-sanitize": "^2.0.2",
+    "express-rate-limit": "^5.2.3",
+    "helmet": "^4.3.1",
+    "hpp": "^0.2.3",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.11.9",
     "morgan": "^1.10.0",
     "nodemailer": "^6.4.17",
     "slugify": "^1.4.6",
-    "validator": "^13.5.2"
+    "validator": "^13.5.2",
+    "xss-clean": "^0.1.1"
   },
   "devDependencies": {
     "eslint": "^7.16.0",

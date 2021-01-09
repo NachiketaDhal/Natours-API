@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
-const validator = require('validator');
+// const validator = require('validator');
+// const User = require('./userModel');
 
 // Schema
 const tourSchema = new mongoose.Schema(
@@ -80,7 +81,37 @@ const tourSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    startLocation: {
+      // GeoJSON
+      type: {
+        type: String,
+        default: 'Point',
+        enum: ['Point'],
+      },
+      coordinates: [Number],
+      address: String,
+      description: String,
+    },
+    locations: [
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point'],
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+      },
+    ],
+    guides: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+      },
+    ],
   },
+
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
@@ -100,6 +131,25 @@ tourSchema.pre('save', function (next) {
   next();
 });
 
+tourSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: 'guides',
+    select: '-__v -passwordChangedAt',
+  });
+  next();
+});
+
+////////////////////////////////////////////////////////////
+// this middleware embeds the whole user-guide document into tour from their id
+// at first guides was an array containing ids of guides then whole document of guide
+// tourSchema.pre('save', async function (next) {
+//   const toursPromise = this.guides.map(async (id) => await User.findById(id));
+//   // toursPromise array is a collection of promises so...
+//   this.guides = await Promise.all(toursPromise);
+//   next();
+// });
+
+////////////////////////////////////////////////////////////
 // tourSchema.pre('save', function (next) {
 //   console.log('Will save documents');
 //   next();
@@ -112,7 +162,6 @@ tourSchema.pre('save', function (next) {
 
 /////////////////////////////////////////////////////
 // QUERY MIDDLEWARE--> runs before or after a query is executed
-// tourSchema.pre('find', function (next) {
 tourSchema.pre(/^find/, function (next) {
   this.find({ secretTour: { $ne: true } }); // this --> current query
 

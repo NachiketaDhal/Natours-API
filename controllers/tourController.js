@@ -23,6 +23,7 @@ const catchAsync = require('../utils/catchAsync');
   next();
 }; */
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // top-5-cheap
 exports.aliasTopTours = (req, res, next) => {
   req.query.limit = '5';
@@ -31,6 +32,8 @@ exports.aliasTopTours = (req, res, next) => {
   next();
 };
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// GET ALL TOURS
 exports.getAllTours = catchAsync(async (req, res, next) => {
   // EXECUTE QUERY
   const features = new APIFeatures(Tour.find(), req.query)
@@ -50,6 +53,8 @@ exports.getAllTours = catchAsync(async (req, res, next) => {
   });
 });
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// GET A PARTICULAR TOUR
 exports.getTour = catchAsync(async (req, res, next) => {
   const tour = await Tour.findById(req.params.id);
   // const tour = await Tour.findOne({ _id: req.params.id });
@@ -66,6 +71,8 @@ exports.getTour = catchAsync(async (req, res, next) => {
   });
 });
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// CREATE TOUR
 exports.createTour = catchAsync(async (req, res, next) => {
   // const newTour = new Tour({});
   // newTour.save();
@@ -80,6 +87,8 @@ exports.createTour = catchAsync(async (req, res, next) => {
   });
 });
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// UPDATE TOUR
 exports.updateTour = catchAsync(async (req, res, next) => {
   const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
@@ -98,6 +107,8 @@ exports.updateTour = catchAsync(async (req, res, next) => {
   });
 });
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// DELETE TOUR
 exports.deleteTour = catchAsync(async (req, res, next) => {
   const tour = await Tour.findByIdAndDelete(req.params.id);
 
@@ -111,6 +122,8 @@ exports.deleteTour = catchAsync(async (req, res, next) => {
   });
 });
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// GET TOUR STATS USING AGGREGATION PIPELINE
 exports.getTourStats = catchAsync(async (req, res, next) => {
   const stats = await Tour.aggregate([
     {
@@ -143,6 +156,8 @@ exports.getTourStats = catchAsync(async (req, res, next) => {
   });
 });
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// GET MONTHLY PLAN USING AGGREGATION PIPELINE
 exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
   const year = parseInt(req.params.year);
   const plan = await Tour.aggregate([
