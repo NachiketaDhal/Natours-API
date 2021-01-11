@@ -2,6 +2,7 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const APIFeatures = require('../utils/apiFeatures');
 
+// Get all documents
 exports.getAll = (Model) =>
   catchAsync(async (req, res, next) => {
     // To allow for nested GET reviews on tour(hack)
@@ -25,6 +26,7 @@ exports.getAll = (Model) =>
     });
   });
 
+// Get a particular document
 exports.getOne = (Model, popOptions) =>
   catchAsync(async (req, res, next) => {
     let query = Model.findById(req.params.id);
@@ -44,6 +46,7 @@ exports.getOne = (Model, popOptions) =>
     });
   });
 
+// Create a document
 exports.createOne = (Model) =>
   catchAsync(async (req, res, next) => {
     const doc = await Model.create(req.body);
@@ -56,6 +59,7 @@ exports.createOne = (Model) =>
     });
   });
 
+// Update a document
 exports.updateOne = (Model) =>
   catchAsync(async (req, res, next) => {
     const doc = await Model.findByIdAndUpdate(req.params.id, req.body, {
@@ -75,6 +79,7 @@ exports.updateOne = (Model) =>
     });
   });
 
+// Delete a document
 exports.deleteOne = (Model) =>
   catchAsync(async (req, res, next) => {
     const doc = await Model.findByIdAndDelete(req.params.id);
