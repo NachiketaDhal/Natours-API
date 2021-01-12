@@ -1,6 +1,7 @@
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const APIFeatures = require('../utils/apiFeatures');
+// const reviewController = require('../controllers/reviewController');
 
 // Get all documents
 exports.getAll = (Model) =>
@@ -15,6 +16,7 @@ exports.getAll = (Model) =>
       .limitFields()
       .pagination();
     const doc = await features.query;
+    // const doc = await features.query.explain(); // To observe indexing
 
     // SEND RESPONSE
     res.status(200).json({

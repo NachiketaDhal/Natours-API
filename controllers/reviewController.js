@@ -1,5 +1,5 @@
 const Review = require('../model/reviewModel');
-const catchAsync = require('../utils/catchAsync');
+// const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
 
 // MIDDLEWARE used incase of creating review

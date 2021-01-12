@@ -36,7 +36,7 @@ class APIFeatures {
   limitFields() {
     // 3) Field Limiting
     if (this.queryString.fields) {
-      let fields = this.queryString.fields.split(',').join(' ');
+      const fields = this.queryString.fields.split(',').join(' ');
       this.query = this.query.select(fields); // including
     } else {
       this.query = this.query.select('-__v'); // excluding(-)
@@ -46,8 +46,8 @@ class APIFeatures {
 
   pagination() {
     // 4) Pagination
-    const page = parseInt(this.queryString.page) || 1; // page number
-    const limit = parseInt(this.queryString.limit) || 10; // total number of documnets per page
+    const page = parseInt(this.queryString.page, 10) || 1; // page number
+    const limit = parseInt(this.queryString.limit, 10) || 10; // total number of documnets per page
     const skip = (page - 1) * limit; // total number of documnets to skip
 
     this.query = this.query.skip(skip).limit(limit);

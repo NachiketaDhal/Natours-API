@@ -50,8 +50,7 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Mongoose document pre MIDDLEWARE(pre--> because password needs to be hashed before saving to the database)
+// Mongoose document pre MIDDLEWARE(pre--> because password needs to be hashed before saving to the database) //////////////
 userSchema.pre('save', async function (next) {
   // Only run this function if the password is modified
   if (!this.isModified('password')) return next();
@@ -64,8 +63,7 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// To modify the passwordChangedAt property after password reset
+// To modify the passwordChangedAt property after password reset ///////////////////////////////////////////////////
 userSchema.pre('save', function (next) {
   if (this.isModified('password') || this.isNew) return next();
 
@@ -73,15 +71,13 @@ userSchema.pre('save', function (next) {
   next();
 });
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// To use the query only on active users
+// To use the query only on active users /////////////////////////////////////////////////////////////////////////
 userSchema.pre(/^find/, function (next) {
   this.find({ active: { $ne: false } });
   next();
 });
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// PASSWORD COMPARISION
+// PASSWORD COMPARISION /////////////////////////////////////////////////////////////////////////
 // correctPassword is an instance method which will be available in all documents of a certain collection
 // this --> current document
 userSchema.methods.correctPassword = async function (
@@ -93,11 +89,13 @@ userSchema.methods.correctPassword = async function (
   return await bcrypt.compare(candidatePassword, userPassword);
 };
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// To check if the password is changed after receiving token
+// To check if the password is changed after receiving token /////////////////////////////////////////////////////////
 userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
-    const changedTimeStamp = parseInt(this.passwordChangedAt.getTime() / 1000);
+    const changedTimeStamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10
+    );
     // console.log(changedTimeStamp, JWTTimestamp);
     return JWTTimestamp < changedTimeStamp;
   }
@@ -105,8 +103,7 @@ userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   return false;
 };
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// To create password reset token
+// To create password reset token /////////////////////////////////////////////////////////////////////////
 userSchema.methods.createPasswordResetToken = function () {
   const resetToken = crypto.randomBytes(32).toString('hex'); // creates random token
 
@@ -116,7 +113,7 @@ userSchema.methods.createPasswordResetToken = function () {
     .update(resetToken)
     .digest('hex');
 
-  console.log({ resetToken }, this.passwordResetToken);
+  // console.log({ resetToken }, this.passwordResetToken);
 
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes in milliseconds
 

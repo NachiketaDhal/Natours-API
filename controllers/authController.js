@@ -1,21 +1,18 @@
 const crypto = require('crypto');
 const { promisify } = require('util');
+const jwt = require('jsonwebtoken');
 const User = require('../model/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
-const jwt = require('jsonwebtoken');
 const sendEmail = require('../utils/email');
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Generate Token
-const signToken = (id) => {
-  return jwt.sign({ id: id }, process.env.JWT_SECRET, {
+// Generate Token ///////////////////////////////////////////////////////////////////////////////////////////
+const signToken = (id) =>
+  jwt.sign({ id: id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
-};
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Send Token
+// Send Token ///////////////////////////////////////////////////////////////////////////////////////////////////
 const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
   const cookieOptions = {
@@ -30,6 +27,7 @@ const createSendToken = (user, statusCode, res) => {
   res.cookie('jwt', token, cookieOptions);
 
   // Removes the password from output
+  // eslint-disable-next-line no-param-reassign
   user.password = undefined;
 
   res.status(statusCode).json({
@@ -41,8 +39,7 @@ const createSendToken = (user, statusCode, res) => {
   });
 };
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// SIGNUP
+// SIGNUP ///////////////////////////////////////////////////////////////////////////////////////////////////
 exports.signUp = catchAsync(async (req, res, next) => {
   const newUser = await User.create({
     name: req.body.name,
@@ -57,8 +54,7 @@ exports.signUp = catchAsync(async (req, res, next) => {
   createSendToken(newUser, 201, res);
 });
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// LOGIN
+// LOGIN ///////////////////////////////////////////////////////////////////////////////////////////////////
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
 
@@ -81,8 +77,7 @@ exports.login = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// PROTECTED ROUTE can only be accessed by LOGGEDIN users
+// PROTECTED ROUTE can only be accessed by LOGGEDIN users ////////////////////////////////////////////////////
 exports.protect = catchAsync(async (req, res, next) => {
   // 1) Getting token and check if it's there
   let token;
@@ -126,11 +121,10 @@ exports.protect = catchAsync(async (req, res, next) => {
   next();
 });
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// ROUTE RESTRICTION (like delete route can only be accessed by admin)
-exports.restrictTO = (...roles) => {
+// ROUTE RESTRICTION (like delete route can only be accessed by admin) //////////////////////////////////////////
+exports.restrictTO = (...roles) =>
   // roles--> REST OPERATOR
-  return (req, res, next) => {
+  (req, res, next) => {
     // roles--> ['admin', 'lead-guide']  if(role--> 'user') then no permission
     if (!roles.includes(req.user.role)) {
       return next(
@@ -139,10 +133,8 @@ exports.restrictTO = (...roles) => {
     }
     next();
   };
-};
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// FORGOT PASSWORD
+// FORGOT PASSWORD ///////////////////////////////////////////////////////////////////////////////////////////////////
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   // 1) Get user based on POSTed email
   const user = await User.findOne({ email: req.body.email });
@@ -182,8 +174,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   }
 });
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// RESET PASSWORD
+// RESET PASSWORD ///////////////////////////////////////////////////////////////////////////////////////////////////
 exports.resetPassword = catchAsync(async (req, res, next) => {
   // 1) Get user based on the token
   const hashedToken = crypto
@@ -212,8 +203,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// UPDATE PASSWORD FOR LOGGEDIN USERS(req.user)
+// UPDATE PASSWORD FOR LOGGEDIN USERS(req.user) ////////////////////////////////////////////////////////////
 exports.updatePassword = catchAsync(async (req, res, next) => {
   // 1) Get user from collection
   const user = await User.findById(req.user._id).select('+password');
@@ -233,8 +223,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// INACTIVE USERS
+// INACTIVE USERS ///////////////////////////////////////////////////////////////////////////////////////////////////
 exports.inactiveUsers = catchAsync(async (req, res, next) => {
   const users = await User.aggregate([
     {

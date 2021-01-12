@@ -1,7 +1,7 @@
 const express = require('express');
 const userController = require('../controllers/userController');
 const authController = require('../controllers/authController');
-const reviewController = require('../controllers/reviewController');
+// const reviewController = require('../controllers/reviewController');
 
 const router = express.Router();
 
@@ -14,7 +14,6 @@ router.patch('/resetpassword/:token', authController.resetPassword);
 router.use(authController.protect); // All the routes(middlewares) after this middleware are protected
 
 router.patch('/updatepassword', authController.updatePassword);
-
 router.patch('/updateme', userController.updateMe);
 router.delete('/deleteme', userController.deleteMe);
 router.get('/me', userController.getMe, userController.getUser);

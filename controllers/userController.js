@@ -11,14 +11,13 @@ const filterObj = (obj, ...allowedFields) => {
   return newObj;
 };
 
-// '/getme' route
+// '/me' route
 exports.getMe = (req, res, next) => {
   req.params.id = req.user.id;
   next();
 };
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// LOGGEDIN USER CAN UPDATE HIS/HER DATA
+// LOGGEDIN USER CAN UPDATE HIS/HER DATA //////////////////////////////////////////////////////////////////
 exports.updateMe = catchAsync(async (req, res, next) => {
   // 1) Create error if user POSTs password data
   if (req.body.password || req.body.passwordConfirm) {
@@ -47,10 +46,9 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   });
 });
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// LOGGEDIN USER CAN DELETE HIS/HER ACCOUNT
+// LOGGEDIN USER CAN DELETE HIS/HER ACCOUNT /////////////////////////////////////////////////////////////////
 exports.deleteMe = catchAsync(async (req, res, next) => {
-  const user = await User.findByIdAndUpdate(req.user.id, { active: false });
+  await User.findByIdAndUpdate(req.user.id, { active: false });
 
   res.status(204).json({
     status: 'success',

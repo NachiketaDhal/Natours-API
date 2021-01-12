@@ -1,6 +1,6 @@
-const Tour = require('./../model/tourModel');
-const APIFeatures = require('../utils/apiFeatures');
-const AppError = require('../utils/appError');
+const Tour = require('../model/tourModel');
+// const APIFeatures = require('../utils/apiFeatures');
+// const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
 
@@ -24,8 +24,7 @@ const factory = require('./handlerFactory');
   next();
 }; */
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// top-5-cheap
+// top-5-cheap ///////////////////////////////////////////////////////////////////////////////////////////
 exports.aliasTopTours = (req, res, next) => {
   req.query.limit = '5';
   req.query.sort = '-ratingsAverage, price';
@@ -54,8 +53,7 @@ exports.deleteTour = factory.deleteOne(Tour);
 //   });
 // });
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// GET TOUR STATS USING AGGREGATION PIPELINE
+// GET TOUR STATS USING AGGREGATION PIPELINE ////////////////////////////////////////////////////////////
 exports.getTourStats = catchAsync(async (req, res, next) => {
   const stats = await Tour.aggregate([
     {
@@ -63,7 +61,7 @@ exports.getTourStats = catchAsync(async (req, res, next) => {
     },
     {
       $group: {
-        _id: { $toUpper: '$difficulty' },
+        _id: { $toUpper: '$difficulty' }, // common field
         // _id: '$ratingsAverage',
         numTours: { $sum: 1 },
         numRatings: { $sum: '$ratingsQuantity' },
@@ -88,10 +86,9 @@ exports.getTourStats = catchAsync(async (req, res, next) => {
   });
 });
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// GET MONTHLY PLAN USING AGGREGATION PIPELINE
+// GET MONTHLY PLAN USING AGGREGATION PIPELINE ////////////////////////////////////////
 exports.getMonthlyPlan = catchAsync(async (req, res, next) => {
-  const year = parseInt(req.params.year);
+  const year = parseInt(req.params.year, 10);
   const plan = await Tour.aggregate([
     {
       $unwind: '$startDates',
