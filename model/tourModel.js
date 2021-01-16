@@ -122,6 +122,7 @@ const tourSchema = new mongoose.Schema(
 // Indexing
 tourSchema.index({ price: 1, ratingsAverage: -1 });
 tourSchema.index({ slug: 1 });
+tourSchema.index({ startLocation: '2dsphere' });
 
 // Virtual properties(we can't use this in a query as they are not part of Database)
 tourSchema.virtual('durationWeeks').get(function () {
@@ -184,11 +185,11 @@ tourSchema.post(/^find/, function (docs, next) {
 });
 
 // AGGRIGATION MIDDLEWARE--> runs before or after an aggrigation happens ///////////////////////////////////
-tourSchema.pre('aggregate', function (next) {
-  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
-  console.log(this.pipeline()); // current aggrigation
-  next();
-});
+// tourSchema.pre('aggregate', function (next) {
+//   this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+//   console.log(this.pipeline()); // current aggrigation
+//   next();
+// });
 
 // Model
 const Tour = mongoose.model('Tour', tourSchema);

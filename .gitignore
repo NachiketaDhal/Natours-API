@@ -1,5 +1,6 @@
 node_modules/
 config.env
-node_modules/
-config.env
 secret.txt
+public/templates/
+dev-data/templates/
+.cache/

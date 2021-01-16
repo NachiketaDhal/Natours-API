@@ -77,6 +77,16 @@ exports.login = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
+// LOGOUT //////////////////////////////////////////////////////////////////////////////////
+exports.logout = catchAsync(async (req, res, next) => {
+  // send cookie with same jwt, but without any token(null) and set the expire time in the past
+  res.cookie('jwt', 'null', {
+    expires: new Date(Date.now() - 10 * 1000),
+    httpOnly: true,
+  });
+  res.status(200).json({ status: 'success' });
+});
+
 // PROTECTED ROUTE can only be accessed by LOGGEDIN users ////////////////////////////////////////////////////
 exports.protect = catchAsync(async (req, res, next) => {
   // 1) Getting token and check if it's there
@@ -88,6 +98,8 @@ exports.protect = catchAsync(async (req, res, next) => {
   ) {
     token = req.headers.authorization.split(' ')[1];
     // console.log(token);
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
 
   if (!token) {
@@ -118,6 +130,34 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   // GRANT ACCESS TO THE PROTECTED ROUTE
   req.user = currentUser; // storing user to the req
+  res.locals.user = currentUser; // user--> this variable will be available for every pug templates
+  next();
+});
+
+// Only for rendered pages, no errors!
+exports.isLoggedIn = catchAsync(async (req, res, next) => {
+  if (req.cookies.jwt) {
+    // 1) verify token
+    const decoded = await promisify(jwt.verify)(
+      req.cookies.jwt,
+      process.env.JWT_SECRET
+    );
+
+    // 2) Check if user still exists
+    const currentUser = await User.findById(decoded.id);
+    if (!currentUser) {
+      return next();
+    }
+
+    // 3) Check if user changed password after the token was issued
+    if (currentUser.changedPasswordAfter(decoded.iat)) {
+      return next();
+    }
+
+    // THERE IS A LOGGED IN USER
+    res.locals.user = currentUser; // user--> this variable will be available for every pug templates
+    return next();
+  }
   next();
 });
 
