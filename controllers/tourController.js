@@ -1,28 +1,64 @@
+const multer = require('multer');
+const sharp = require('sharp');
 const Tour = require('../model/tourModel');
-// const APIFeatures = require('../utils/apiFeatures');
 const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 const factory = require('./handlerFactory');
 
-// const fs = require('fs');
+const multerStorage = multer.memoryStorage();
 
-// const tours = JSON.parse(
-//   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`, 'utf-8')
-// );
-
-// param middleware
-/* exports.checkID = (req, res, next, val) => {
-  console.log(`Tour id is ${val}`);
-  const id = parseInt(req.params.id);
-  // console.log(typeof req.params.id);   // string
-  if (id >= tours.length) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Invalid ID',
-    });
+// To check if the uploaded files are image or not
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith('image')) {
+    cb(null, true);
+  } else {
+    cb(new AppError('Not an image! Please upload only images.', 400), false);
   }
+};
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+});
+
+// upload.array('images', 3)--> For multiple files(single filed)
+// upload.single('image')--> For a single file
+
+// Multiple files(multiple fields)
+exports.uploadTourImages = upload.fields([
+  { name: 'imageCover', maxCount: 1 },
+  { name: 'images', maxCount: 3 },
+]);
+
+exports.resizeTourImages = catchAsync(async (req, res, next) => {
+  // console.log(req.files);
+  if (!req.files.imageCover || !req.files.images) return next();
+
+  // 1) Cover image
+  req.body.imageCover = `tour-${req.params.id}-cover.jpeg`;
+  await sharp(req.files.imageCover[0].buffer)
+    .resize(2000, 1333)
+    .toFormat('jpeg')
+    .jpeg({ quality: 90 })
+    .toFile(`public/img/tours/${req.body.imageCover}`);
+
+  // 2) Images
+  req.body.images = [];
+  await Promise.all(
+    req.files.images.map(async (file, index) => {
+      const fileName = `tour-${req.params.id}-${index + 1}.jpeg`;
+
+      await sharp(file.buffer)
+        .resize(2000, 1333)
+        .toFormat('jpeg')
+        .jpeg({ quality: 90 })
+        .toFile(`public/img/tours/${fileName}`);
+
+      req.body.images.push(fileName);
+    })
+  );
   next();
-}; */
+});
 
 // top-5-cheap ///////////////////////////////////////////////////////////////////////////////////////////
 exports.aliasTopTours = (req, res, next) => {
