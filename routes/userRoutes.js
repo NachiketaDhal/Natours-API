@@ -15,7 +15,11 @@ router.patch('/resetpassword/:token', authController.resetPassword);
 router.use(authController.protect); // All the routes(middlewares) after this middleware are protected
 
 router.patch('/updatepassword', authController.updatePassword);
-router.patch('/updateme', userController.updateMe);
+router.patch(
+  '/updateme',
+  userController.uploadUserPhoto,
+  userController.updateMe
+);
 router.delete('/deleteme', userController.deleteMe);
 router.get('/me', userController.getMe, userController.getUser);
 
