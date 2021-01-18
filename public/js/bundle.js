@@ -8193,7 +8193,72 @@ function token(name, fn) {
   morgan[name] = fn;
   return this;
 }
-},{"basic-auth":"../../node_modules/basic-auth/index.js","debug":"../../node_modules/debug/src/browser.js","depd":"../../node_modules/morgan/node_modules/depd/lib/browser/index.js","on-finished":"../../node_modules/on-finished/index.js","on-headers":"../../node_modules/on-headers/index.js","process":"../../node_modules/process/browser.js"}],"index.js":[function(require,module,exports) {
+},{"basic-auth":"../../node_modules/basic-auth/index.js","debug":"../../node_modules/debug/src/browser.js","depd":"../../node_modules/morgan/node_modules/depd/lib/browser/index.js","on-finished":"../../node_modules/on-finished/index.js","on-headers":"../../node_modules/on-headers/index.js","process":"../../node_modules/process/browser.js"}],"forgetpassword.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.forgotPassword = void 0;
+
+var _axios = _interopRequireDefault(require("axios"));
+
+var _alert = require("./alert");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+const forgotPassword = async email => {
+  try {
+    const res = await (0, _axios.default)({
+      method: 'POST',
+      url: 'api/v1/users/forgotpassword',
+      data: {
+        email: email
+      }
+    });
+
+    if (res.data.status === 'success') {
+      (0, _alert.showAlert)('success', 'Please check your email');
+      location.assign('/');
+    }
+  } catch (err) {
+    (0, _alert.showAlert)('error', 'Something went wrong');
+  }
+};
+
+exports.forgotPassword = forgotPassword;
+},{"axios":"../../node_modules/axios/index.js","./alert":"alert.js"}],"resetpassword.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.resetPassword = void 0;
+
+const resetPassword = async (password, passwordConfirm, resetToken) => {
+  try {
+    const res = await axios({
+      method: 'PATCH',
+      url: "/api/v1/users/resetPassword/".concat(resetToken),
+      data: {
+        password: password,
+        passwordConfirm: passwordConfirm
+      }
+    });
+
+    if (res.data.status === 'success') {
+      showAlert('success', 'Password changed successfully');
+      window.setTimeout(() => {
+        location.assign('/me');
+      }, 1500);
+    }
+  } catch (err) {
+    showAlert('error', err.response.data.message);
+  }
+};
+
+exports.resetPassword = resetPassword;
+},{}],"index.js":[function(require,module,exports) {
 "use strict";
 
 require("core-js/modules/es7.array.flat-map.js");
@@ -8256,13 +8321,20 @@ var _signup = require("./signup");
 
 var _morgan = require("morgan");
 
+var _forgetpassword = require("./forgetpassword");
+
+var _resetpassword = require("./resetpassword");
+
 // DOM ELEMENTS
 const mapbox = document.getElementById('map');
 const loginForm = document.querySelector('.form--login');
+const loginBtn = document.querySelector('.btn--login');
 const logoutBtn = document.querySelector('.nav__el--logout');
 const userDataForm = document.querySelector('.form-user-data');
 const userPasswordForm = document.querySelector('.form-user-password');
-const signupForm = document.querySelector('.signup-form'); // VALUES
+const signupForm = document.querySelector('.signup-form');
+const forgotPasswordFrom = document.querySelector('.form--forgotpassword');
+const resetPasswordForm = document.querySelector('.form--resetpassword'); // VALUES
 // DELEGATION
 
 if (mapbox) {
@@ -8330,8 +8402,27 @@ if (userPasswordForm) {
     document.querySelector('.btn--save--password').innerText = 'Save password';
     userPasswordForm.reset();
   });
+} // FORGOT PASSWORD
+
+
+if (forgotPasswordFrom) {
+  forgotPasswordFrom.addEventListener('submit', e => {
+    e.preventDefault();
+    const email = document.getElementById('emailForgotPassword').value;
+    (0, _forgetpassword.forgotPassword)(email);
+  });
 }
-},{"core-js/modules/es7.array.flat-map.js":"../../node_modules/core-js/modules/es7.array.flat-map.js","core-js/modules/es6.array.iterator.js":"../../node_modules/core-js/modules/es6.array.iterator.js","core-js/modules/es6.array.sort.js":"../../node_modules/core-js/modules/es6.array.sort.js","core-js/modules/es7.object.define-getter.js":"../../node_modules/core-js/modules/es7.object.define-getter.js","core-js/modules/es7.object.define-setter.js":"../../node_modules/core-js/modules/es7.object.define-setter.js","core-js/modules/es7.object.lookup-getter.js":"../../node_modules/core-js/modules/es7.object.lookup-getter.js","core-js/modules/es7.object.lookup-setter.js":"../../node_modules/core-js/modules/es7.object.lookup-setter.js","core-js/modules/es6.object.to-string.js":"../../node_modules/core-js/modules/es6.object.to-string.js","core-js/modules/es7.promise.finally.js":"../../node_modules/core-js/modules/es7.promise.finally.js","core-js/modules/es6.regexp.constructor.js":"../../node_modules/core-js/modules/es6.regexp.constructor.js","core-js/modules/es6.regexp.flags.js":"../../node_modules/core-js/modules/es6.regexp.flags.js","core-js/modules/es6.regexp.match.js":"../../node_modules/core-js/modules/es6.regexp.match.js","core-js/modules/es6.regexp.replace.js":"../../node_modules/core-js/modules/es6.regexp.replace.js","core-js/modules/es6.regexp.split.js":"../../node_modules/core-js/modules/es6.regexp.split.js","core-js/modules/es6.regexp.search.js":"../../node_modules/core-js/modules/es6.regexp.search.js","core-js/modules/es6.regexp.to-string.js":"../../node_modules/core-js/modules/es6.regexp.to-string.js","core-js/modules/es6.symbol.js":"../../node_modules/core-js/modules/es6.symbol.js","core-js/modules/es7.symbol.async-iterator.js":"../../node_modules/core-js/modules/es7.symbol.async-iterator.js","core-js/modules/es7.string.pad-start.js":"../../node_modules/core-js/modules/es7.string.pad-start.js","core-js/modules/es7.string.pad-end.js":"../../node_modules/core-js/modules/es7.string.pad-end.js","core-js/modules/es7.string.trim-left.js":"../../node_modules/core-js/modules/es7.string.trim-left.js","core-js/modules/es7.string.trim-right.js":"../../node_modules/core-js/modules/es7.string.trim-right.js","core-js/modules/web.timers.js":"../../node_modules/core-js/modules/web.timers.js","core-js/modules/web.immediate.js":"../../node_modules/core-js/modules/web.immediate.js","core-js/modules/web.dom.iterable.js":"../../node_modules/core-js/modules/web.dom.iterable.js","./mapbox":"mapbox.js","./login":"login.js","./updateSettings":"updateSettings.js","./signup":"signup.js","morgan":"../../node_modules/morgan/index.js"}],"../../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+
+if (resetPasswordForm) {
+  resetPasswordForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const password = document.getElementById('passwordResetPassword').value;
+    const passwordConfirm = document.getElementById('passwordConfirmResetPassword'); // const token = location.href.split('/')[-1];
+
+    (0, _resetpassword.resetPassword)(password, passwordConfirm);
+  });
+}
+},{"core-js/modules/es7.array.flat-map.js":"../../node_modules/core-js/modules/es7.array.flat-map.js","core-js/modules/es6.array.iterator.js":"../../node_modules/core-js/modules/es6.array.iterator.js","core-js/modules/es6.array.sort.js":"../../node_modules/core-js/modules/es6.array.sort.js","core-js/modules/es7.object.define-getter.js":"../../node_modules/core-js/modules/es7.object.define-getter.js","core-js/modules/es7.object.define-setter.js":"../../node_modules/core-js/modules/es7.object.define-setter.js","core-js/modules/es7.object.lookup-getter.js":"../../node_modules/core-js/modules/es7.object.lookup-getter.js","core-js/modules/es7.object.lookup-setter.js":"../../node_modules/core-js/modules/es7.object.lookup-setter.js","core-js/modules/es6.object.to-string.js":"../../node_modules/core-js/modules/es6.object.to-string.js","core-js/modules/es7.promise.finally.js":"../../node_modules/core-js/modules/es7.promise.finally.js","core-js/modules/es6.regexp.constructor.js":"../../node_modules/core-js/modules/es6.regexp.constructor.js","core-js/modules/es6.regexp.flags.js":"../../node_modules/core-js/modules/es6.regexp.flags.js","core-js/modules/es6.regexp.match.js":"../../node_modules/core-js/modules/es6.regexp.match.js","core-js/modules/es6.regexp.replace.js":"../../node_modules/core-js/modules/es6.regexp.replace.js","core-js/modules/es6.regexp.split.js":"../../node_modules/core-js/modules/es6.regexp.split.js","core-js/modules/es6.regexp.search.js":"../../node_modules/core-js/modules/es6.regexp.search.js","core-js/modules/es6.regexp.to-string.js":"../../node_modules/core-js/modules/es6.regexp.to-string.js","core-js/modules/es6.symbol.js":"../../node_modules/core-js/modules/es6.symbol.js","core-js/modules/es7.symbol.async-iterator.js":"../../node_modules/core-js/modules/es7.symbol.async-iterator.js","core-js/modules/es7.string.pad-start.js":"../../node_modules/core-js/modules/es7.string.pad-start.js","core-js/modules/es7.string.pad-end.js":"../../node_modules/core-js/modules/es7.string.pad-end.js","core-js/modules/es7.string.trim-left.js":"../../node_modules/core-js/modules/es7.string.trim-left.js","core-js/modules/es7.string.trim-right.js":"../../node_modules/core-js/modules/es7.string.trim-right.js","core-js/modules/web.timers.js":"../../node_modules/core-js/modules/web.timers.js","core-js/modules/web.immediate.js":"../../node_modules/core-js/modules/web.immediate.js","core-js/modules/web.dom.iterable.js":"../../node_modules/core-js/modules/web.dom.iterable.js","./mapbox":"mapbox.js","./login":"login.js","./updateSettings":"updateSettings.js","./signup":"signup.js","morgan":"../../node_modules/morgan/index.js","./forgetpassword":"forgetpassword.js","./resetpassword":"resetpassword.js"}],"../../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -8359,7 +8450,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51776" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53382" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

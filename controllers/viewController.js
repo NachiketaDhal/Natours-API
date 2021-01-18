@@ -2,6 +2,7 @@ const Tour = require('../model/tourModel');
 const User = require('../model/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
+const { forgotPassword } = require('./authController');
 
 exports.getOverview = catchAsync(async (req, res, next) => {
   // 1) Get the tour data from the collection
@@ -84,3 +85,16 @@ exports.updateUserData = catchAsync(async (req, res, next) => {
     user: updatedUser,
   });
 });
+
+exports.forgotPassword = (req, res) => {
+  res.status(200).render('forgotpassword', {
+    title: 'Forgot Password',
+  });
+};
+
+exports.resetPassword = (req, res) => {
+  res.status(200).render('resetpassword', {
+    title: 'Reset Password',
+    token: req.params.token,
+  });
+};

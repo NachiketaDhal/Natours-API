@@ -1221,7 +1221,9 @@ body {
   margin: 0 auto;
 }
 
-.login-form {
+.login-form,
+.forgotpassword-form,
+.resetpassword-form {
   margin: 0 auto;
   max-width: 55rem;
   background-color: #fff;
@@ -1379,3 +1381,19 @@ body {
 /* width: 0px; */
 /* Optional: just make scrollbar invisible */
 /* background: transparent; */
+
+.from--link {
+  color: #7dd56f;
+  font-size: 1.5rem;
+  transition: all 0.5s ease-in-out;
+}
+
+.from--link:hover {
+  background-color: #55c57a;
+  color: #fff;
+  padding: 1px 2px;
+  -webkit-box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.15);
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.15);
+  -webkit-transform: translateY(-2px);
+  transform: translateY(-2px);
+}

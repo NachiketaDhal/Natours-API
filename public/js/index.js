@@ -6,14 +6,19 @@ import { login, logout } from './login';
 import { updateSettings } from './updateSettings';
 import { signup } from './signup';
 import { format } from 'morgan';
+import { forgotPassword } from './forgetpassword';
+import { resetPassword } from './resetpassword';
 
 // DOM ELEMENTS
 const mapbox = document.getElementById('map');
 const loginForm = document.querySelector('.form--login');
+const loginBtn = document.querySelector('.btn--login');
 const logoutBtn = document.querySelector('.nav__el--logout');
 const userDataForm = document.querySelector('.form-user-data');
 const userPasswordForm = document.querySelector('.form-user-password');
 const signupForm = document.querySelector('.signup-form');
+const forgotPasswordFrom = document.querySelector('.form--forgotpassword');
+const resetPasswordForm = document.querySelector('.form--resetpassword');
 
 // VALUES
 
@@ -89,5 +94,27 @@ if (userPasswordForm) {
     // Change button text and clear input-fields after changing password
     document.querySelector('.btn--save--password').innerText = 'Save password';
     userPasswordForm.reset();
+  });
+}
+
+// FORGOT PASSWORD
+if (forgotPasswordFrom) {
+  forgotPasswordFrom.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const email = document.getElementById('emailForgotPassword').value;
+    forgotPassword(email);
+  });
+}
+
+if (resetPasswordForm) {
+  resetPasswordForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const password = document.getElementById('passwordResetPassword').value;
+    const passwordConfirm = document.getElementById(
+      'passwordConfirmResetPassword'
+    );
+    // const token = location.href.split('/')[-1];
+
+    resetPassword(password, passwordConfirm);
   });
 }
