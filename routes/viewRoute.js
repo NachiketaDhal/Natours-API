@@ -10,7 +10,7 @@ router.get('/login', authController.isLoggedIn, viewController.getLoginForm);
 router.get('/signup', viewController.getSignupForm);
 router.get('/me', authController.protect, viewController.getAccount);
 router.get('/forgotpassword', viewController.forgotPassword);
-router.get('/resetpassword/:token', viewController.resetPassword);
+router.get('/resetpassword/:resetToken', viewController.resetPassword);
 
 router.post(
   '/submit-user-data',

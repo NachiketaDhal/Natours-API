@@ -8,6 +8,7 @@ import { signup } from './signup';
 import { format } from 'morgan';
 import { forgotPassword } from './forgetpassword';
 import { resetPassword } from './resetpassword';
+import { bookTour } from './stripe';
 
 // DOM ELEMENTS
 const mapbox = document.getElementById('map');
@@ -19,6 +20,7 @@ const userPasswordForm = document.querySelector('.form-user-password');
 const signupForm = document.querySelector('.signup-form');
 const forgotPasswordFrom = document.querySelector('.form--forgotpassword');
 const resetPasswordForm = document.querySelector('.form--resetpassword');
+const bookBtn = document.getElementById('book-tour');
 
 // VALUES
 
@@ -50,11 +52,18 @@ if (signupForm) {
 
 // LOGIN USING AXION(API) //////////////////////////////////////////////////////////////////////////////////////
 if (loginForm) {
-  loginForm.addEventListener('submit', (e) => {
+  loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    // Change button text while login
+    document.querySelector('.btn--login').innerText = 'Logging...';
+
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    login(email, password);
+    await login(email, password);
+
+    // Change button text after login
+    document.querySelector('.btn--login').innerText = 'Login';
   });
 }
 // LOGOUT USING AXION(API) //////////////////////////////////////////////////////////////////////////////////////
@@ -99,22 +108,46 @@ if (userPasswordForm) {
 
 // FORGOT PASSWORD
 if (forgotPasswordFrom) {
-  forgotPasswordFrom.addEventListener('submit', (e) => {
+  forgotPasswordFrom.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    // Change button text while sending email
+    document.querySelector('.btn-forgot-password').innerText = 'Sending...';
+
     const email = document.getElementById('emailForgotPassword').value;
-    forgotPassword(email);
+    await forgotPassword(email);
+
+    // Change button text after sending email
+    document.querySelector('.btn-forgot-password').innerText = 'Submit';
   });
 }
 
+// RESET PASSWORD
 if (resetPasswordForm) {
-  resetPasswordForm.addEventListener('submit', (e) => {
+  resetPasswordForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    // Change button text while resetting password
+    document.querySelector('.btn--reset').innerText = 'Resetting...';
+
     const password = document.getElementById('passwordResetPassword').value;
     const passwordConfirm = document.getElementById(
       'passwordConfirmResetPassword'
-    );
-    // const token = location.href.split('/')[-1];
+    ).value;
+    const resetToken = document.getElementById('resetToken').value;
 
-    resetPassword(password, passwordConfirm);
+    await resetPassword(password, passwordConfirm, resetToken);
+
+    // Change button text after resetting password
+    document.querySelector('.btn--reset').innerText = 'Reset';
+  });
+}
+
+// BOOKING PAYMENT BUTTON
+if (bookBtn) {
+  bookBtn.addEventListener('click', (e) => {
+    e.target.innerText = 'Processing...';
+    const { tourId } = e.target.dataset;
+    bookTour(tourId);
   });
 }

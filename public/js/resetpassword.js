@@ -1,8 +1,11 @@
+import axios from 'axios';
+import { showAlert } from './alert';
+
 export const resetPassword = async (password, passwordConfirm, resetToken) => {
   try {
     const res = await axios({
       method: 'PATCH',
-      url: `/api/v1/users/resetPassword/${resetToken}`,
+      url: `/api/v1/users/resetpassword/${resetToken}`,
       data: {
         password: password,
         passwordConfirm: passwordConfirm,

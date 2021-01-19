@@ -8235,11 +8235,17 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.resetPassword = void 0;
 
+var _axios = _interopRequireDefault(require("axios"));
+
+var _alert = require("./alert");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 const resetPassword = async (password, passwordConfirm, resetToken) => {
   try {
-    const res = await axios({
+    const res = await (0, _axios.default)({
       method: 'PATCH',
-      url: "/api/v1/users/resetPassword/".concat(resetToken),
+      url: "/api/v1/users/resetpassword/".concat(resetToken),
       data: {
         password: password,
         passwordConfirm: passwordConfirm
@@ -8247,18 +8253,51 @@ const resetPassword = async (password, passwordConfirm, resetToken) => {
     });
 
     if (res.data.status === 'success') {
-      showAlert('success', 'Password changed successfully');
+      (0, _alert.showAlert)('success', 'Password changed successfully');
       window.setTimeout(() => {
         location.assign('/me');
       }, 1500);
     }
   } catch (err) {
-    showAlert('error', err.response.data.message);
+    (0, _alert.showAlert)('error', err.response.data.message);
   }
 };
 
 exports.resetPassword = resetPassword;
-},{}],"index.js":[function(require,module,exports) {
+},{"axios":"../../node_modules/axios/index.js","./alert":"alert.js"}],"stripe.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.bookTour = void 0;
+
+var _axios = _interopRequireDefault(require("axios"));
+
+var _alert = require("./alert");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/* eslint-disable */
+const bookTour = async tourId => {
+  const stripe = Stripe('pk_test_51IAz1lG6PPOjwmB8qmOjJW9juoI8mXyQ4HLOaLB6aNCOGGpD0e3TDASUfVDUF4Gi7kfulFcRK4ZoVRIz8Y2uql8L00yLDiP9Wj');
+
+  try {
+    // 1) Get checkout session from API
+    const session = await (0, _axios.default)("/api/v1/bookings/checkout-session/".concat(tourId)); // console.log(session);
+    // 2) Create checkout form + charge credit card
+
+    await stripe.redirectToCheckout({
+      sessionId: session.data.session.id
+    });
+  } catch (err) {
+    console.log(err);
+    (0, _alert.showAlert)('error', err);
+  }
+};
+
+exports.bookTour = bookTour;
+},{"axios":"../../node_modules/axios/index.js","./alert":"alert.js"}],"index.js":[function(require,module,exports) {
 "use strict";
 
 require("core-js/modules/es7.array.flat-map.js");
@@ -8325,6 +8364,8 @@ var _forgetpassword = require("./forgetpassword");
 
 var _resetpassword = require("./resetpassword");
 
+var _stripe = require("./stripe");
+
 // DOM ELEMENTS
 const mapbox = document.getElementById('map');
 const loginForm = document.querySelector('.form--login');
@@ -8334,7 +8375,8 @@ const userDataForm = document.querySelector('.form-user-data');
 const userPasswordForm = document.querySelector('.form-user-password');
 const signupForm = document.querySelector('.signup-form');
 const forgotPasswordFrom = document.querySelector('.form--forgotpassword');
-const resetPasswordForm = document.querySelector('.form--resetpassword'); // VALUES
+const resetPasswordForm = document.querySelector('.form--resetpassword');
+const bookBtn = document.getElementById('book-tour'); // VALUES
 // DELEGATION
 
 if (mapbox) {
@@ -8361,11 +8403,15 @@ if (signupForm) {
 
 
 if (loginForm) {
-  loginForm.addEventListener('submit', e => {
-    e.preventDefault();
+  loginForm.addEventListener('submit', async e => {
+    e.preventDefault(); // Change button text while login
+
+    document.querySelector('.btn--login').innerText = 'Logging...';
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    (0, _login.login)(email, password);
+    await (0, _login.login)(email, password); // Change button text after login
+
+    document.querySelector('.btn--login').innerText = 'Login';
   });
 } // LOGOUT USING AXION(API) //////////////////////////////////////////////////////////////////////////////////////
 
@@ -8406,23 +8452,43 @@ if (userPasswordForm) {
 
 
 if (forgotPasswordFrom) {
-  forgotPasswordFrom.addEventListener('submit', e => {
-    e.preventDefault();
+  forgotPasswordFrom.addEventListener('submit', async e => {
+    e.preventDefault(); // Change button text while sending email
+
+    document.querySelector('.btn-forgot-password').innerText = 'Sending...';
     const email = document.getElementById('emailForgotPassword').value;
-    (0, _forgetpassword.forgotPassword)(email);
+    await (0, _forgetpassword.forgotPassword)(email); // Change button text after sending email
+
+    document.querySelector('.btn-forgot-password').innerText = 'Submit';
   });
-}
+} // RESET PASSWORD
+
 
 if (resetPasswordForm) {
-  resetPasswordForm.addEventListener('submit', e => {
-    e.preventDefault();
-    const password = document.getElementById('passwordResetPassword').value;
-    const passwordConfirm = document.getElementById('passwordConfirmResetPassword'); // const token = location.href.split('/')[-1];
+  resetPasswordForm.addEventListener('submit', async e => {
+    e.preventDefault(); // Change button text while resetting password
 
-    (0, _resetpassword.resetPassword)(password, passwordConfirm);
+    document.querySelector('.btn--reset').innerText = 'Resetting...';
+    const password = document.getElementById('passwordResetPassword').value;
+    const passwordConfirm = document.getElementById('passwordConfirmResetPassword').value;
+    const resetToken = document.getElementById('resetToken').value;
+    await (0, _resetpassword.resetPassword)(password, passwordConfirm, resetToken); // Change button text after resetting password
+
+    document.querySelector('.btn--reset').innerText = 'Reset';
+  });
+} // BOOKING PAYMENT BUTTON
+
+
+if (bookBtn) {
+  bookBtn.addEventListener('click', e => {
+    e.target.innerText = 'Processing...';
+    const {
+      tourId
+    } = e.target.dataset;
+    (0, _stripe.bookTour)(tourId);
   });
 }
-},{"core-js/modules/es7.array.flat-map.js":"../../node_modules/core-js/modules/es7.array.flat-map.js","core-js/modules/es6.array.iterator.js":"../../node_modules/core-js/modules/es6.array.iterator.js","core-js/modules/es6.array.sort.js":"../../node_modules/core-js/modules/es6.array.sort.js","core-js/modules/es7.object.define-getter.js":"../../node_modules/core-js/modules/es7.object.define-getter.js","core-js/modules/es7.object.define-setter.js":"../../node_modules/core-js/modules/es7.object.define-setter.js","core-js/modules/es7.object.lookup-getter.js":"../../node_modules/core-js/modules/es7.object.lookup-getter.js","core-js/modules/es7.object.lookup-setter.js":"../../node_modules/core-js/modules/es7.object.lookup-setter.js","core-js/modules/es6.object.to-string.js":"../../node_modules/core-js/modules/es6.object.to-string.js","core-js/modules/es7.promise.finally.js":"../../node_modules/core-js/modules/es7.promise.finally.js","core-js/modules/es6.regexp.constructor.js":"../../node_modules/core-js/modules/es6.regexp.constructor.js","core-js/modules/es6.regexp.flags.js":"../../node_modules/core-js/modules/es6.regexp.flags.js","core-js/modules/es6.regexp.match.js":"../../node_modules/core-js/modules/es6.regexp.match.js","core-js/modules/es6.regexp.replace.js":"../../node_modules/core-js/modules/es6.regexp.replace.js","core-js/modules/es6.regexp.split.js":"../../node_modules/core-js/modules/es6.regexp.split.js","core-js/modules/es6.regexp.search.js":"../../node_modules/core-js/modules/es6.regexp.search.js","core-js/modules/es6.regexp.to-string.js":"../../node_modules/core-js/modules/es6.regexp.to-string.js","core-js/modules/es6.symbol.js":"../../node_modules/core-js/modules/es6.symbol.js","core-js/modules/es7.symbol.async-iterator.js":"../../node_modules/core-js/modules/es7.symbol.async-iterator.js","core-js/modules/es7.string.pad-start.js":"../../node_modules/core-js/modules/es7.string.pad-start.js","core-js/modules/es7.string.pad-end.js":"../../node_modules/core-js/modules/es7.string.pad-end.js","core-js/modules/es7.string.trim-left.js":"../../node_modules/core-js/modules/es7.string.trim-left.js","core-js/modules/es7.string.trim-right.js":"../../node_modules/core-js/modules/es7.string.trim-right.js","core-js/modules/web.timers.js":"../../node_modules/core-js/modules/web.timers.js","core-js/modules/web.immediate.js":"../../node_modules/core-js/modules/web.immediate.js","core-js/modules/web.dom.iterable.js":"../../node_modules/core-js/modules/web.dom.iterable.js","./mapbox":"mapbox.js","./login":"login.js","./updateSettings":"updateSettings.js","./signup":"signup.js","morgan":"../../node_modules/morgan/index.js","./forgetpassword":"forgetpassword.js","./resetpassword":"resetpassword.js"}],"../../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"core-js/modules/es7.array.flat-map.js":"../../node_modules/core-js/modules/es7.array.flat-map.js","core-js/modules/es6.array.iterator.js":"../../node_modules/core-js/modules/es6.array.iterator.js","core-js/modules/es6.array.sort.js":"../../node_modules/core-js/modules/es6.array.sort.js","core-js/modules/es7.object.define-getter.js":"../../node_modules/core-js/modules/es7.object.define-getter.js","core-js/modules/es7.object.define-setter.js":"../../node_modules/core-js/modules/es7.object.define-setter.js","core-js/modules/es7.object.lookup-getter.js":"../../node_modules/core-js/modules/es7.object.lookup-getter.js","core-js/modules/es7.object.lookup-setter.js":"../../node_modules/core-js/modules/es7.object.lookup-setter.js","core-js/modules/es6.object.to-string.js":"../../node_modules/core-js/modules/es6.object.to-string.js","core-js/modules/es7.promise.finally.js":"../../node_modules/core-js/modules/es7.promise.finally.js","core-js/modules/es6.regexp.constructor.js":"../../node_modules/core-js/modules/es6.regexp.constructor.js","core-js/modules/es6.regexp.flags.js":"../../node_modules/core-js/modules/es6.regexp.flags.js","core-js/modules/es6.regexp.match.js":"../../node_modules/core-js/modules/es6.regexp.match.js","core-js/modules/es6.regexp.replace.js":"../../node_modules/core-js/modules/es6.regexp.replace.js","core-js/modules/es6.regexp.split.js":"../../node_modules/core-js/modules/es6.regexp.split.js","core-js/modules/es6.regexp.search.js":"../../node_modules/core-js/modules/es6.regexp.search.js","core-js/modules/es6.regexp.to-string.js":"../../node_modules/core-js/modules/es6.regexp.to-string.js","core-js/modules/es6.symbol.js":"../../node_modules/core-js/modules/es6.symbol.js","core-js/modules/es7.symbol.async-iterator.js":"../../node_modules/core-js/modules/es7.symbol.async-iterator.js","core-js/modules/es7.string.pad-start.js":"../../node_modules/core-js/modules/es7.string.pad-start.js","core-js/modules/es7.string.pad-end.js":"../../node_modules/core-js/modules/es7.string.pad-end.js","core-js/modules/es7.string.trim-left.js":"../../node_modules/core-js/modules/es7.string.trim-left.js","core-js/modules/es7.string.trim-right.js":"../../node_modules/core-js/modules/es7.string.trim-right.js","core-js/modules/web.timers.js":"../../node_modules/core-js/modules/web.timers.js","core-js/modules/web.immediate.js":"../../node_modules/core-js/modules/web.immediate.js","core-js/modules/web.dom.iterable.js":"../../node_modules/core-js/modules/web.dom.iterable.js","./mapbox":"mapbox.js","./login":"login.js","./updateSettings":"updateSettings.js","./signup":"signup.js","morgan":"../../node_modules/morgan/index.js","./forgetpassword":"forgetpassword.js","./resetpassword":"resetpassword.js","./stripe":"stripe.js"}],"../../node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -8450,7 +8516,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53382" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61834" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -8627,4 +8693,4 @@ function hmrAcceptRun(bundle, id) {
   }
 }
 },{}]},{},["../../node_modules/parcel-bundler/src/builtins/hmr-runtime.js","index.js"], null)
-//# sourceMappingURL=/bundle.js.map
+//# sourceMappingURL=/js/bundle.js.map
