@@ -187,7 +187,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   }
 
   // 2) Generate the random reset token(not jwt)
-  const resetToken = user.createPasswordResetToken(); // origin token (not hashed)
+  const resetToken = user.createPasswordResetToken(); // original token (not hashed)
   await user.save({ validateBeforeSave: false }); // it will deactivate all the validators specified in our schema
 
   // 3) Send it to user's email
