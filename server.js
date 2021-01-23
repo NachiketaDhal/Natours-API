@@ -29,8 +29,8 @@ mongoose
   .then(() => console.log('DB connection successful')); // resolve
 // .catch((err) => console.log(err)); // reject
 
-// Creating Document
 /*
+// Creating Document
 const testTour = new Tour({
   name: 'The Park Camper',
   price: 997,
@@ -58,3 +58,11 @@ process.on('unhandledRejection', (err) => {
 });
 
 // console.log(x);
+
+// SIGTERM--> A signal that stops the program from running
+process.on('SIGTERM', () => {
+  console.log('👋zz SIGTERM RECEIVED, shutting down gracefully');
+  server.close(() => {
+    console.log('💥 process terminated');
+  });
+});
