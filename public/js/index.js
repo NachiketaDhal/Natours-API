@@ -9,6 +9,7 @@ import { format } from 'morgan';
 import { forgotPassword } from './forgetpassword';
 import { resetPassword } from './resetpassword';
 import { bookTour } from './stripe';
+import { showAlert } from './alert';
 
 // DOM ELEMENTS
 const mapbox = document.getElementById('map');
@@ -151,3 +152,6 @@ if (bookBtn) {
     bookTour(tourId);
   });
 }
+
+const alertMessage = document.querySelector('body').dataset.alert;
+if (alert) showAlert('success', alertMessage, 20);
