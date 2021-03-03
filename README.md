@@ -26,7 +26,7 @@ This app is a pet project, built for the express purpose of honing my skills in 
 
 #### Home Page :
 
-![natoursHomePage](https://github.com/NachiketaDhal/Natours-API/blob/master/public/Screenshots/Home.png)
+![natoursHomePage](https://github.com/NachiketaDhal/Natours-API/blob/master/public/Screenshots/Home.png | width=640)
 
 #### Tour Details :
 
@@ -34,15 +34,15 @@ This app is a pet project, built for the express purpose of honing my skills in 
 
 #### Payment Process :
 
-![paymentprocess](https://github.com/NachiketaDhal/Natours-API/blob/master/public/Screenshots/Payment.png)
+![paymentprocess](https://github.com/NachiketaDhal/Natours-API/blob/master/public/Screenshots/Payment.png | width=640)
 
 #### LOGIN PAGE :
 
-![login](https://github.com/NachiketaDhal/Natours-API/blob/master/public/Screenshots/Login.png)
+![login](https://github.com/NachiketaDhal/Natours-API/blob/master/public/Screenshots/Login.png | width=640)
 
 #### User Profile :
 
-![userprofile](https://github.com/NachiketaDhal/Natours-API/blob/master/public/Screenshots/Admin.png)
+![userprofile](https://github.com/NachiketaDhal/Natours-API/blob/master/public/Screenshots/Admin.png | width=640)
 
 ## Main Tools And Technologies Used
 
@@ -96,7 +96,7 @@ If you wish to play around with the code base in your local environment, do the 
 
 #### Demo-`.env` file :
 
-![demo-env](https://github.com/NachiketaDhal/Natours-API/blob/master/public/Screenshots/Demo-env.png)
+![demo-env](https://github.com/NachiketaDhal/Natours-API/blob/master/public/Screenshots/Demo-env.png | width=640)
 
 ## Main Features
 
