@@ -1,11 +1,12 @@
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
+const { Log } = require('logs-colorifier');
 
 // UNCAUGHT EXCEPTION(Errors occured in synchronous code, but never handles)
 // Should be defined in the top-level
 process.on('uncaughtException', (err) => {
-  console.log(err.name, err.message);
-  console.log('UNCAUGHT EXCEPTION! Shutting down...');
+  Log.error(err.name, err.message);
+  Log.error('UNCAUGHT EXCEPTION! Shutting down...');
   process.exit(1);
 });
 
@@ -26,7 +27,7 @@ mongoose
     useUnifiedTopology: true,
     useFindAndModify: false,
   })
-  .then(() => console.log('DB connection successful')); // resolve
+  .then(() => Log.success('DB connection successful')); // resolve
 // .catch((err) => console.log(err)); // reject
 
 /*
@@ -45,7 +46,7 @@ testTour
 
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () => {
-  console.log(`App running on port ${port}...`);
+  Log.success(`App running on port ${port}...`);
 });
 
 // UNHANDLED PROMISE REJEJCTION(Errors occured in asynchronous code, but never handles)
